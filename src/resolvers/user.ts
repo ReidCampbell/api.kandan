@@ -129,7 +129,7 @@ export class UserResolver {
 
     await sendEmail(
       email,
-      `<a href="https://warm-atoll-46518.herokuapp.com/change-password/${token}">reset password</a>`
+      `<a href="https://reiddit.reidcampbell.xyz/change-password/${token}">reset password</a>`
     );
 
     return true;
