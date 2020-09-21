@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import 'dotenv-safe/config';
 import { COOKIE_NAME, __prod__ } from './constants';
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
@@ -21,9 +22,7 @@ import { createUpdootLoader } from './util/createUpdootLoader';
 const main = async () => {
   const connection = await createConnection({
     type: 'postgres',
-    database: 'reiddit2',
-    username: 'postgres',
-    password: 'postgres',
+    url: process.env.DATABASE_URL,
     logging: true,
     synchronize: true,
     migrations: [path.join(__dirname, './migrations/*')],
@@ -48,7 +47,7 @@ const main = async () => {
       name: COOKIE_NAME,
       store: new RedisStore({ client: redis, disableTouch: true }),
       saveUninitialized: false,
-      secret: 'qwewerrttyyfd',
+      secret: process.env.SESSION_SECRET,
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
         httpOnly: true,
@@ -75,9 +74,11 @@ const main = async () => {
 
   apolloServer.applyMiddleware({ app, cors: false });
 
-  app.listen(4000, () => {
-    console.log('server started on localhost:4000');
+  app.listen(parseInt(process.env.PORT), () => {
+    console.log('server started');
   });
 };
 
-main();
+main().catch(err => {
+  console.error(err);
+});

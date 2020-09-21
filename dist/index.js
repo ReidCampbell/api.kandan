@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 require("reflect-metadata");
+require("dotenv-safe/config");
 const constants_1 = require("./constants");
 const express_1 = __importDefault(require("express"));
 const apollo_server_express_1 = require("apollo-server-express");
@@ -33,9 +34,7 @@ const createUpdootLoader_1 = require("./util/createUpdootLoader");
 const main = () => __awaiter(void 0, void 0, void 0, function* () {
     const connection = yield typeorm_1.createConnection({
         type: 'postgres',
-        database: 'reiddit2',
-        username: 'postgres',
-        password: 'postgres',
+        url: process.env.DATABASE_URL,
         logging: true,
         synchronize: true,
         migrations: [path_1.default.join(__dirname, './migrations/*')],
@@ -53,7 +52,7 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
         name: constants_1.COOKIE_NAME,
         store: new RedisStore({ client: redis, disableTouch: true }),
         saveUninitialized: false,
-        secret: 'qwewerrttyyfd',
+        secret: process.env.SESSION_SECRET,
         cookie: {
             maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
             httpOnly: true,
@@ -76,9 +75,11 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
         }),
     });
     apolloServer.applyMiddleware({ app, cors: false });
-    app.listen(4000, () => {
-        console.log('server started on localhost:4000');
+    app.listen(parseInt(process.env.PORT), () => {
+        console.log('server started');
     });
 });
-main();
+main().catch(err => {
+    console.error(err);
+});
 //# sourceMappingURL=index.js.map
