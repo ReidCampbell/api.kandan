@@ -24,11 +24,11 @@ const main = async () => {
     type: 'postgres',
     url: process.env.DATABASE_URL,
     logging: true,
-    synchronize: true,
+    // synchronize: true,
     migrations: [path.join(__dirname, './migrations/*')],
     entities: [Post, User, Updoot],
   });
-  // await connection.runMigrations();
+  await connection.runMigrations();
 
   const app = express();
 
