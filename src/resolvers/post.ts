@@ -119,7 +119,8 @@ export class PostResolver {
     @Arg('cursor', () => String, { nullable: true }) cursor: string | null
   ): Promise<PaginatedPosts> {
     const realLimit = Math.min(50, limit);
-    const realLimitPlusOne = realLimit + 1;
+    // const realLimitPlusOne = realLimit + 1;
+    const realLimitPlusOne = realLimit;
 
     const replacements: any[] = [realLimitPlusOne];
 
