@@ -2,6 +2,7 @@ import { ObjectType, Field } from 'type-graphql';
 import { Entity, PrimaryColumn, BaseEntity, ManyToOne, Column } from 'typeorm';
 import { Post } from './Post';
 import { User } from './User';
+import { Comment } from './Comment';
 
 @ObjectType()
 @Entity()
@@ -32,4 +33,16 @@ export class Updoot extends BaseEntity {
     { onDelete: 'CASCADE' }
   )
   post: Post;
+
+  @Field()
+  @PrimaryColumn()
+  commentId: number;
+
+  @Field(() => Comment)
+  @ManyToOne(
+    () => Comment,
+    comment => comment.updoots,
+    { onDelete: 'CASCADE' }
+  )
+  comment: Comment;
 }
