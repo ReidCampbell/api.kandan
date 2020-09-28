@@ -20,12 +20,6 @@ import { Updoot } from '../entities/Updoot';
 import { User } from '../entities/User';
 import { Post } from '../entities/Post';
 
-@InputType()
-class CommentInput {
-  @Field()
-  text: string;
-}
-
 @ObjectType()
 class PaginatedComments {
   @Field(() => [Comment])
@@ -112,30 +106,24 @@ export class CommentResolver {
     return true;
   }
 
+  // MIGHT NOT NEED
   @Query(() => PaginatedComments)
   async comments(
     @Arg('limit', () => Int) limit: number,
-    @Arg('cursor', () => String, { nullable: true }) cursor: string | null
+    @Arg('postId', () => Int) postId: number
   ): Promise<PaginatedComments> {
-    const realLimit = Math.min(50, limit);
-    // const realLimitPlusOne = realLimit + 1;
-    const realLimitPlusOne = realLimit;
-
-    const replacements: any[] = [realLimitPlusOne];
-
-    if (cursor) {
-      replacements.push(new Date(parseInt(cursor)));
-    }
+    const realLimit = Math.min(10, limit);
+    const realLimitPlusOne = realLimit + 1;
 
     const comments = await getConnection().query(
       `
       select p.*
       from comment p
-      ${cursor ? `where p."createdAt" < $2` : ''}
+      where p."postId" = $1
       order by p."createdAt" DESC
       limit $1
     `,
-      replacements
+      [postId]
     );
 
     return {
@@ -152,13 +140,12 @@ export class CommentResolver {
   @Mutation(() => Comment)
   @UseMiddleware(isAuth)
   async createComment(
-    @Arg('input') input: CommentInput,
+    @Arg('postId', () => Int) postId: number,
+    @Arg('text', () => String) text: string,
     @Ctx() { req }: MyContext
-  ): Promise<Comment> {
-    if (!req.session.userId) {
-      throw new Error('Not authenticated');
-    }
-    return Comment.create({ ...input, creatorId: req.session.userId }).save();
+  ) {
+    const { userId } = req.session;
+    return Comment.create({ text, creatorId: userId, postId }).save();
   }
 
   @Mutation(() => Comment, { nullable: true })
