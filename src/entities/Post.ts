@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import { Updoot } from './Updoot';
 import { User } from './User';
+import { Comment } from './Comment';
 
 @ObjectType()
 @Entity()
@@ -58,4 +59,11 @@ export class Post extends BaseEntity {
     updoot => updoot.post
   )
   updoots: Updoot[];
+
+  @Field(() => [Comment], { nullable: true })
+  @OneToMany(
+    () => Comment,
+    comment => comment.post
+  )
+  comments: Comment[];
 }
