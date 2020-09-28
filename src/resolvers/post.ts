@@ -49,13 +49,17 @@ export class PostResolver {
   }
 
   @FieldResolver(() => Comment)
-  async comments(@Root() post: Post, @Ctx() { commentLoader, req }: MyContext) {
-    const comment = await commentLoader.load({
-      postId: post.id,
-      userId: req.session.userId,
-    });
-
-    return comment;
+  async comments(@Root() post: Post) {
+    const comments = await getConnection().query(
+      `
+      select p.*
+      from comment p
+      where p."postId" = $1
+      order by p."createdAt" DESC
+    `,
+      [post.id]
+    );
+    return comments;
   }
 
   @FieldResolver(() => Int, { nullable: true })
