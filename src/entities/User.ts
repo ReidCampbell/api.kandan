@@ -10,6 +10,7 @@ import {
 import { ObjectType, Field } from 'type-graphql';
 import { Post } from './Post';
 import { Updoot } from './Updoot';
+import { Comment } from './Comment';
 
 @ObjectType()
 @Entity()
@@ -42,6 +43,12 @@ export class User extends BaseEntity {
     post => post.creator
   )
   posts: Post[];
+
+  @OneToMany(
+    () => Comment,
+    comment => comment.creator
+  )
+  comments: Comment[];
 
   @OneToMany(
     () => Updoot,
