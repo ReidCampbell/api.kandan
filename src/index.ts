@@ -6,6 +6,7 @@ import { ApolloServer } from 'apollo-server-express';
 import { buildSchema } from 'type-graphql';
 import { UserResolver } from './resolvers/user';
 import { PostResolver } from './resolvers/post';
+import { CommentResolver } from './resolvers/comment';
 import Redis from 'ioredis';
 import session from 'express-session';
 import connectRedis from 'connect-redis';
@@ -14,10 +15,12 @@ import cors from 'cors';
 import { createConnection } from 'typeorm';
 import { Post } from './entities/Post';
 import { User } from './entities/User';
+import { Comment } from './entities/Comment';
 import path from 'path';
 import { Updoot } from './entities/Updoot';
 import { createUserLoader } from './util/createUserLoader';
 import { createUpdootLoader } from './util/createUpdootLoader';
+import { createCommentLoader } from './util/createCommentLoader';
 
 const main = async () => {
   const connection = await createConnection({
@@ -26,7 +29,7 @@ const main = async () => {
     logging: true,
     // synchronize: true,
     migrations: [path.join(__dirname, './migrations/*')],
-    entities: [Post, User, Updoot],
+    entities: [Post, User, Updoot, Comment],
   });
   await connection.runMigrations();
 
@@ -34,7 +37,7 @@ const main = async () => {
 
   const RedisStore = connectRedis(session);
   const redis = new Redis(process.env.REDIS_URL);
-  app.set('proxy', 1);
+  app.set('trust proxy', 1);
   app.use(
     cors({
       origin: process.env.CORS_ORIGIN,
@@ -61,7 +64,7 @@ const main = async () => {
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [PostResolver, UserResolver],
+      resolvers: [PostResolver, UserResolver, CommentResolver],
       validate: false,
     }),
     context: ({ req, res }: MyContext) => ({
@@ -70,6 +73,7 @@ const main = async () => {
       redis,
       userLoader: createUserLoader(),
       updootLoader: createUpdootLoader(),
+      commentLoader: createCommentLoader(),
     }),
   });
 
