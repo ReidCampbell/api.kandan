@@ -20,7 +20,7 @@ import path from 'path';
 import { Updoot } from './entities/Updoot';
 import { createUserLoader } from './util/createUserLoader';
 import { createUpdootLoader } from './util/createUpdootLoader';
-import { createCommentLoader } from './util/createCommentLoader';
+import { createPostLoader } from './util/createPostLoader';
 
 const main = async () => {
   const connection = await createConnection({
@@ -73,7 +73,7 @@ const main = async () => {
       redis,
       userLoader: createUserLoader(),
       updootLoader: createUpdootLoader(),
-      commentLoader: createCommentLoader(),
+      postLoader: createPostLoader(),
     }),
   });
 
