@@ -76,6 +76,16 @@ export class PostResolver {
       userId: req.session.userId,
     });
 
+    if (!updoot) {
+      await getConnection().transaction(async tm => {
+        await tm.query(
+          `insert into updoot ("userId", "postId", value)
+          values ($1, $2, $3)`,
+          [req.session.userId, post.id, 1]
+        );
+      });
+    }
+
     return updoot ? updoot.value : null;
   }
 
@@ -106,7 +116,7 @@ export class PostResolver {
           `update post
           set points = points + $1
           where id = $2`,
-          [2 * realValue, postId]
+          [realValue, postId]
         );
       });
     } else if (!updoot) {
@@ -134,8 +144,7 @@ export class PostResolver {
     @Arg('cursor', () => String, { nullable: true }) cursor: string | null
   ): Promise<PaginatedPosts> {
     const realLimit = Math.min(50, limit);
-    // const realLimitPlusOne = realLimit + 1;
-    const realLimitPlusOne = realLimit;
+    const realLimitPlusOne = realLimit + 1;
 
     const replacements: any[] = [realLimitPlusOne];
 
