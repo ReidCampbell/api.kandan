@@ -21,6 +21,9 @@ import { Updoot } from './entities/Updoot';
 import { createUserLoader } from './util/createUserLoader';
 import { createUpdootLoader } from './util/createUpdootLoader';
 import { createPostLoader } from './util/createPostLoader';
+import { Reply } from './entities/Reply';
+import { ReplyResolver } from './resolvers/reply';
+import { createCommentLoader } from './util/createCommentLoader';
 
 const main = async () => {
   const connection = await createConnection({
@@ -29,8 +32,10 @@ const main = async () => {
     logging: true,
     // synchronize: true,
     migrations: [path.join(__dirname, './migrations/*')],
-    entities: [Post, User, Updoot, Comment],
+    entities: [Post, User, Updoot, Comment, Reply],
+    // dropSchema: true,
   });
+
   await connection.runMigrations();
 
   const app = express();
@@ -64,7 +69,7 @@ const main = async () => {
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [PostResolver, UserResolver, CommentResolver],
+      resolvers: [PostResolver, UserResolver, CommentResolver, ReplyResolver],
       validate: false,
     }),
     context: ({ req, res }: MyContext) => ({
@@ -74,6 +79,7 @@ const main = async () => {
       userLoader: createUserLoader(),
       updootLoader: createUpdootLoader(),
       postLoader: createPostLoader(),
+      commentLoader: createCommentLoader(),
     }),
   });
 
