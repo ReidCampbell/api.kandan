@@ -1,4 +1,4 @@
-import { ObjectType, Field, Int } from 'type-graphql';
+import { ObjectType, Field } from 'type-graphql';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -9,9 +9,9 @@ import {
   ManyToOne,
   OneToMany,
 } from 'typeorm';
-import { Updoot } from './Updoot';
 import { User } from './User';
 import { Post } from './Post';
+import { Reply } from './Reply';
 
 @ObjectType()
 @Entity()
@@ -33,7 +33,7 @@ export class Comment extends BaseEntity {
   text!: string;
 
   @Field()
-  @Column({ type: 'int', default: 0 })
+  @Column({ type: 'int', default: 1 })
   points!: number;
 
   @Field()
@@ -59,12 +59,19 @@ export class Comment extends BaseEntity {
   )
   post: Post;
 
-  @Field(() => Int, { nullable: true })
-  voteStatus: number | null; // 1 or -1 or null
-
+  @Field(() => [Reply], { nullable: true })
   @OneToMany(
-    () => Updoot,
-    updoot => updoot.post
+    () => Reply,
+    reply => reply.comment
   )
-  updoots: Updoot[];
+  replies: Reply[];
+
+  // @Field(() => Int, { nullable: true })
+  // voteStatus: number | null; // 1 or -1 or null
+
+  // @OneToMany(
+  //   () => Updoot,
+  //   updoot => updoot.comment
+  // )
+  // updoots: Updoot[];
 }
