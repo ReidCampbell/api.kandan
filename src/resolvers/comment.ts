@@ -7,7 +7,6 @@ import {
   Mutation,
   Field,
   Ctx,
-  InputType,
   UseMiddleware,
   Int,
   FieldResolver,
@@ -16,7 +15,6 @@ import {
 } from 'type-graphql';
 import { Comment } from '../entities/Comment';
 import { getConnection } from 'typeorm';
-import { Updoot } from '../entities/Updoot';
 import { User } from '../entities/User';
 import { Post } from '../entities/Post';
 
@@ -40,71 +38,85 @@ export class CommentResolver {
     return postLoader.load(comment.postId);
   }
 
-  @FieldResolver(() => Int, { nullable: true })
-  async voteStatus(
-    @Root() comment: Comment,
-    @Ctx() { updootLoader, req }: MyContext
-  ) {
-    if (!req.session.userId) {
-      return null;
-    }
-
-    const updoot = await updootLoader.load({
-      commentId: comment.id,
-      userId: req.session.userId,
-    });
-
-    return updoot ? updoot.value : null;
+  @FieldResolver(() => Comment)
+  async replies(@Root() comment: Comment) {
+    const replies = await getConnection().query(
+      `
+      select p.*
+      from reply p
+      where p."commentId" = $1
+      order by p."createdAt" DESC
+    `,
+      [comment.id]
+    );
+    return replies;
   }
 
-  @Mutation(() => Boolean)
-  @UseMiddleware(isAuth)
-  async vote(
-    @Arg('commentId', () => Int) commentId: number,
-    @Arg('value', () => Int) value: number,
-    @Ctx() { req }: MyContext
-  ) {
-    const isUpdoot = value !== -1;
-    const realValue = isUpdoot ? 1 : -1;
-    const { userId } = req.session;
+  // @FieldResolver(() => Int, { nullable: true })
+  // async voteStatus(
+  //   @Root() comment: Comment,
+  //   @Ctx() { updootLoader, req }: MyContext
+  // ) {
+  //   if (!req.session.userId) {
+  //     return null;
+  //   }
 
-    const updoot = await Updoot.findOne({ where: { commentId, userId } });
+  //   const updoot = await updootLoader.load({
+  //     commentId: comment.id,
+  //     userId: req.session.userId,
+  //   });
 
-    if (updoot && updoot.value !== realValue) {
-      await getConnection().transaction(async tm => {
-        await tm.query(
-          `update updoot
-          set value = $1
-          where "commentId" = $2 and "userId" = $3
-          `,
-          [realValue, commentId, userId]
-        );
+  //   return updoot ? updoot.value : null;
+  // }
 
-        await tm.query(
-          `update comment
-          set points = points + $1
-          where id = $2`,
-          [2 * realValue, commentId]
-        );
-      });
-    } else if (!updoot) {
-      await getConnection().transaction(async tm => {
-        await tm.query(
-          `insert into updoot ("userId", "commentId", value)
-          values ($1, $2, $3)`,
-          [userId, commentId, realValue]
-        );
-        await tm.query(
-          `update comment
-          set points = points + $1
-          where id = $2`,
-          [realValue, commentId]
-        );
-      });
-    }
+  // @Mutation(() => Boolean)
+  // @UseMiddleware(isAuth)
+  // async vote(
+  //   @Arg('commentId', () => Int) commentId: number,
+  //   @Arg('value', () => Int) value: number,
+  //   @Ctx() { req }: MyContext
+  // ) {
+  //   const isUpdoot = value !== -1;
+  //   const realValue = isUpdoot ? 1 : -1;
+  //   const { userId } = req.session;
 
-    return true;
-  }
+  //   const updoot = await Updoot.findOne({ where: { commentId, userId } });
+
+  //   if (updoot && updoot.value !== realValue) {
+  //     await getConnection().transaction(async tm => {
+  //       await tm.query(
+  //         `update updoot
+  //         set value = $1
+  //         where "commentId" = $2 and "userId" = $3
+  //         `,
+  //         [realValue, commentId, userId]
+  //       );
+
+  //       await tm.query(
+  //         `update comment
+  //         set points = points + $1
+  //         where id = $2`,
+  //         [2 * realValue, commentId]
+  //       );
+  //     });
+  //   } else if (!updoot) {
+  //     await getConnection().transaction(async tm => {
+  //       await tm.query(
+  //         `insert into updoot ("userId", "commentId", value)
+  //         values ($1, $2, $3)`,
+  //         [userId, commentId, realValue]
+  //       );
+  //       await tm.query(
+  //         `update comment
+  //         set points = points + $1
+  //         where id = $2`,
+  //         [realValue, commentId]
+  //       );
+  //     });
+  //   }
+
+  //   return true;
+  // }
 
   // MIGHT NOT NEED
   @Query(() => PaginatedComments)
