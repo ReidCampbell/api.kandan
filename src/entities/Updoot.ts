@@ -34,15 +34,15 @@ export class Updoot extends BaseEntity {
   )
   post: Post;
 
-  @Field()
-  @PrimaryColumn()
-  commentId: number;
+  // @Field()
+  // @PrimaryColumn()
+  // commentId: number;
 
-  @Field(() => Comment)
-  @ManyToOne(
-    () => Comment,
-    comment => comment.updoots,
-    { onDelete: 'CASCADE' }
-  )
-  comment: Comment;
+  // @Field(() => Comment)
+  // @ManyToOne(
+  //   () => Comment,
+  //   comment => comment.updoots,
+  //   { onDelete: 'CASCADE' }
+  // )
+  // comment: Comment;
 }
