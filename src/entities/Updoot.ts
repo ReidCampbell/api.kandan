@@ -2,7 +2,6 @@ import { ObjectType, Field } from 'type-graphql';
 import { Entity, PrimaryColumn, BaseEntity, ManyToOne, Column } from 'typeorm';
 import { Post } from './Post';
 import { User } from './User';
-import { Comment } from './Comment';
 
 @ObjectType()
 @Entity()
