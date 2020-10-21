@@ -84,6 +84,7 @@ export class PostResolver {
           [req.session.userId, post.id, 1]
         );
       });
+      return 1;
     }
 
     return updoot ? updoot.value : null;
@@ -141,6 +142,8 @@ export class PostResolver {
   @Query(() => PaginatedPosts)
   async posts(
     @Arg('limit', () => Int) limit: number,
+    @Arg('column', () => String) column: string,
+    @Arg('order', () => String) order: string,
     @Arg('cursor', () => String, { nullable: true }) cursor: string | null
   ): Promise<PaginatedPosts> {
     const realLimit = Math.min(50, limit);
@@ -156,8 +159,8 @@ export class PostResolver {
       `
       select p.*
       from post p
-      ${cursor ? `where p."createdAt" < $2` : ''}
-      order by p."createdAt" DESC
+      ${cursor ? `where p."${column}" < $2` : ''}
+      order by p."${column}" ${order}
       limit $1
     `,
       replacements
