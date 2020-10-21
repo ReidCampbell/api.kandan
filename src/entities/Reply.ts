@@ -32,8 +32,12 @@ export class Reply extends BaseEntity {
   text!: string;
 
   @Field()
-  @Column({ type: 'int', default: 1 })
-  points!: number;
+  @Column()
+  commentOrReply!: string;
+
+  // @Field()
+  // @Column({ type: 'int', default: 1 })
+  // points!: number;
 
   @Field()
   @Column()

@@ -24,6 +24,7 @@ import { createPostLoader } from './util/createPostLoader';
 import { Reply } from './entities/Reply';
 import { ReplyResolver } from './resolvers/reply';
 import { createCommentLoader } from './util/createCommentLoader';
+import { createReplyLoader } from './util/createReplyLoader';
 
 const main = async () => {
   const connection = await createConnection({
@@ -80,6 +81,7 @@ const main = async () => {
       updootLoader: createUpdootLoader(),
       postLoader: createPostLoader(),
       commentLoader: createCommentLoader(),
+      replyLoader: createReplyLoader(),
     }),
   });
 

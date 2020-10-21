@@ -33,8 +33,15 @@ export class ReplyResolver {
   }
 
   @FieldResolver(() => Comment)
-  comment(@Root() reply: Reply, @Ctx() { commentLoader }: MyContext) {
-    return commentLoader.load(reply.commentId);
+  comment(
+    @Root() reply: Reply,
+    @Ctx() { commentLoader, replyLoader }: MyContext
+  ) {
+    if (reply.commentOrReply === 'comment') {
+      return commentLoader.load(reply.commentId);
+    }
+
+    return replyLoader.load(reply.commentId);
   }
 
   // @FieldResolver(() => Int, { nullable: true })
@@ -139,10 +146,16 @@ export class ReplyResolver {
   async createReply(
     @Arg('commentId', () => Int) commentId: number,
     @Arg('text', () => String) text: string,
+    @Arg('commentOrReply', () => String) commentOrReply: string,
     @Ctx() { req }: MyContext
   ) {
     const { userId } = req.session;
-    return Reply.create({ text, creatorId: userId, commentId }).save();
+    return Reply.create({
+      text,
+      creatorId: userId,
+      commentId,
+      commentOrReply,
+    }).save();
   }
 
   @Mutation(() => Reply, { nullable: true })
