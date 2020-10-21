@@ -48,6 +48,24 @@ export class UserResolver {
     return '';
   }
 
+  @Mutation(() => String)
+  async uploadAvatar(
+    @Arg('avatar') avatar: string,
+    @Ctx() { req }: MyContext
+  ): Promise<String> {
+    const result = await getConnection()
+      .createQueryBuilder()
+      .update(User)
+      .set({ avatar })
+      .where('id = :id', {
+        id: req.session.userId,
+      })
+      .returning('*')
+      .execute();
+
+    return result.raw[0];
+  }
+
   @Mutation(() => UserResponse)
   async changePassword(
     @Arg('token') token: string,

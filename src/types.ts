@@ -4,6 +4,7 @@ import { createUpdootLoader } from './util/createUpdootLoader';
 import { createUserLoader } from './util/createUserLoader';
 import { createPostLoader } from './util/createPostLoader';
 import { createCommentLoader } from './util/createCommentLoader';
+import { createReplyLoader } from './util/createReplyLoader';
 
 export type MyContext = {
   req: Request & { session: Express.Session };
@@ -13,4 +14,5 @@ export type MyContext = {
   updootLoader: ReturnType<typeof createUpdootLoader>;
   postLoader: ReturnType<typeof createPostLoader>;
   commentLoader: ReturnType<typeof createCommentLoader>;
+  replyLoader: ReturnType<typeof createReplyLoader>;
 };

@@ -38,6 +38,10 @@ export class User extends BaseEntity {
   @Column()
   password!: string;
 
+  @Field(() => String, { nullable: true })
+  @Column({ nullable: true })
+  avatar: string;
+
   @OneToMany(
     () => Post,
     post => post.creator
