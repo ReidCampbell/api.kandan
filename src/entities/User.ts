@@ -6,11 +6,12 @@ import {
   Column,
   BaseEntity,
   OneToMany,
+  ManyToMany,
 } from 'typeorm';
 import { ObjectType, Field } from 'type-graphql';
-import { Post } from './Post';
-import { Updoot } from './Updoot';
 import { Comment } from './Comment';
+import { Ticket } from './Ticket';
+import { Board } from './Board';
 
 @ObjectType()
 @Entity()
@@ -42,21 +43,21 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   avatar: string;
 
-  @OneToMany(
-    () => Post,
-    post => post.creator
+  @ManyToMany(
+    () => Board,
+    board => board.users
   )
-  posts: Post[];
+  boards: Board[];
+
+  @OneToMany(
+    () => Ticket,
+    ticket => ticket.creator
+  )
+  tickets: Ticket[];
 
   @OneToMany(
     () => Comment,
     comment => comment.creator
   )
   comments: Comment[];
-
-  @OneToMany(
-    () => Updoot,
-    updoot => updoot.user
-  )
-  updoots: Updoot[];
 }

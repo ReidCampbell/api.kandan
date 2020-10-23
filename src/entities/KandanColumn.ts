@@ -6,14 +6,14 @@ import {
   UpdateDateColumn,
   Column,
   BaseEntity,
-  ManyToOne,
+  OneToMany,
 } from 'typeorm';
-import { User } from './User';
+import { Board } from './Board';
 import { Ticket } from './Ticket';
 
 @ObjectType()
 @Entity()
-export class Comment extends BaseEntity {
+export class KandanColumn extends BaseEntity {
   @Field()
   @PrimaryGeneratedColumn()
   id!: number;
@@ -28,28 +28,19 @@ export class Comment extends BaseEntity {
 
   @Field()
   @Column()
-  text!: string;
+  title!: string;
 
-  @Field()
-  @Column()
-  creatorId: number;
-
-  @Field()
-  @Column()
-  ticketId: number;
-
-  @Field(() => User)
-  @ManyToOne(
-    () => User,
-    user => user.comments
+  @Field(() => Board)
+  @OneToMany(
+    () => Board,
+    board => board.kandanColumns
   )
-  creator: User;
+  board: Board;
 
   @Field(() => Ticket)
-  @ManyToOne(
+  @OneToMany(
     () => Ticket,
-    ticket => ticket.comments,
-    { onDelete: 'CASCADE' }
+    ticket => ticket.kandanColumnId
   )
-  ticket: Ticket;
+  tickets: Ticket;
 }

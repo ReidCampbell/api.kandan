@@ -1,19 +1,21 @@
 import { ObjectType, Field } from 'type-graphql';
 import {
   Entity,
+  BaseEntity,
+  ManyToOne,
+  Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  Column,
-  BaseEntity,
-  ManyToOne,
+  OneToMany,
 } from 'typeorm';
 import { User } from './User';
-import { Ticket } from './Ticket';
+import { KandanColumn } from './KandanColumn';
+import { Comment } from './Comment';
 
 @ObjectType()
 @Entity()
-export class Comment extends BaseEntity {
+export class Ticket extends BaseEntity {
   @Field()
   @PrimaryGeneratedColumn()
   id!: number;
@@ -28,7 +30,11 @@ export class Comment extends BaseEntity {
 
   @Field()
   @Column()
-  text!: string;
+  title!: string;
+
+  @Field()
+  @Column()
+  description!: string;
 
   @Field()
   @Column()
@@ -36,7 +42,7 @@ export class Comment extends BaseEntity {
 
   @Field()
   @Column()
-  ticketId: number;
+  kandanColumnId: number;
 
   @Field(() => User)
   @ManyToOne(
@@ -45,11 +51,19 @@ export class Comment extends BaseEntity {
   )
   creator: User;
 
-  @Field(() => Ticket)
+  @Field(() => KandanColumn)
   @ManyToOne(
-    () => Ticket,
-    ticket => ticket.comments,
+    () => KandanColumn,
+    kandanColumn => kandanColumn.tickets,
     { onDelete: 'CASCADE' }
   )
-  ticket: Ticket;
+  kandKandanColumn: KandanColumn;
+
+  @Field(() => Comment)
+  @OneToMany(
+    () => Comment,
+    comment => comment.ticket,
+    { onDelete: 'CASCADE' }
+  )
+  comments: Comment;
 }
