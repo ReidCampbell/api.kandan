@@ -1,1 +1,2 @@
-# Reiddit-Server
+# API for Kandan Project
+# api.kandan
