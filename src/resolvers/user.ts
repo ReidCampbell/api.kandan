@@ -147,7 +147,7 @@ export class UserResolver {
 
     await sendEmail(
       email,
-      `<a href="https://reiddit.reidcampbell.xyz/change-password/${token}">reset password</a>`
+      `<a href="https://kandan.reidcampbell.xyz/change-password/${token}">reset password</a>`
     );
 
     return true;

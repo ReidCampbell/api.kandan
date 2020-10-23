@@ -16,7 +16,7 @@ import {
 import { Comment } from '../entities/Comment';
 import { getConnection } from 'typeorm';
 import { User } from '../entities/User';
-import { Post } from '../entities/Post';
+import { Ticket } from '../entities/Ticket';
 
 @ObjectType()
 class PaginatedComments {
@@ -33,96 +33,15 @@ export class CommentResolver {
     return userLoader.load(comment.creatorId);
   }
 
-  @FieldResolver(() => Post)
-  post(@Root() comment: Comment, @Ctx() { postLoader }: MyContext) {
-    return postLoader.load(comment.postId);
+  @FieldResolver(() => Ticket)
+  ticket(@Root() comment: Comment, @Ctx() { ticketLoader }: MyContext) {
+    return ticketLoader.load(comment.ticketId);
   }
 
-  @FieldResolver(() => Comment)
-  async replies(@Root() comment: Comment) {
-    const replies = await getConnection().query(
-      `
-      select p.*
-      from reply p
-      where p."commentId" = $1
-      order by p."createdAt" DESC
-    `,
-      [comment.id]
-    );
-    return replies;
-  }
-
-  // @FieldResolver(() => Int, { nullable: true })
-  // async voteStatus(
-  //   @Root() comment: Comment,
-  //   @Ctx() { updootLoader, req }: MyContext
-  // ) {
-  //   if (!req.session.userId) {
-  //     return null;
-  //   }
-
-  //   const updoot = await updootLoader.load({
-  //     commentId: comment.id,
-  //     userId: req.session.userId,
-  //   });
-
-  //   return updoot ? updoot.value : null;
-  // }
-
-  // @Mutation(() => Boolean)
-  // @UseMiddleware(isAuth)
-  // async vote(
-  //   @Arg('commentId', () => Int) commentId: number,
-  //   @Arg('value', () => Int) value: number,
-  //   @Ctx() { req }: MyContext
-  // ) {
-  //   const isUpdoot = value !== -1;
-  //   const realValue = isUpdoot ? 1 : -1;
-  //   const { userId } = req.session;
-
-  //   const updoot = await Updoot.findOne({ where: { commentId, userId } });
-
-  //   if (updoot && updoot.value !== realValue) {
-  //     await getConnection().transaction(async tm => {
-  //       await tm.query(
-  //         `update updoot
-  //         set value = $1
-  //         where "commentId" = $2 and "userId" = $3
-  //         `,
-  //         [realValue, commentId, userId]
-  //       );
-
-  //       await tm.query(
-  //         `update comment
-  //         set points = points + $1
-  //         where id = $2`,
-  //         [2 * realValue, commentId]
-  //       );
-  //     });
-  //   } else if (!updoot) {
-  //     await getConnection().transaction(async tm => {
-  //       await tm.query(
-  //         `insert into updoot ("userId", "commentId", value)
-  //         values ($1, $2, $3)`,
-  //         [userId, commentId, realValue]
-  //       );
-  //       await tm.query(
-  //         `update comment
-  //         set points = points + $1
-  //         where id = $2`,
-  //         [realValue, commentId]
-  //       );
-  //     });
-  //   }
-
-  //   return true;
-  // }
-
-  // MIGHT NOT NEED
   @Query(() => PaginatedComments)
   async comments(
     @Arg('limit', () => Int) limit: number,
-    @Arg('postId', () => Int) postId: number
+    @Arg('ticketId', () => Int) ticketId: number
   ): Promise<PaginatedComments> {
     const realLimit = Math.min(10, limit);
     const realLimitPlusOne = realLimit + 1;
@@ -131,11 +50,11 @@ export class CommentResolver {
       `
       select p.*
       from comment p
-      where p."postId" = $1
+      where p."ticketId" = $1
       order by p."createdAt" DESC
       limit $1
     `,
-      [postId]
+      [ticketId]
     );
 
     return {
@@ -152,12 +71,12 @@ export class CommentResolver {
   @Mutation(() => Comment)
   @UseMiddleware(isAuth)
   async createComment(
-    @Arg('postId', () => Int) postId: number,
+    @Arg('ticketId', () => Int) ticketId: number,
     @Arg('text', () => String) text: string,
     @Ctx() { req }: MyContext
   ) {
     const { userId } = req.session;
-    return Comment.create({ text, creatorId: userId, postId }).save();
+    return Comment.create({ text, creatorId: userId, ticketId }).save();
   }
 
   @Mutation(() => Comment, { nullable: true })

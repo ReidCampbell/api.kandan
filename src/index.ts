@@ -4,8 +4,6 @@ import { COOKIE_NAME, __prod__ } from './constants';
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import { buildSchema } from 'type-graphql';
-import { UserResolver } from './resolvers/user';
-import { PostResolver } from './resolvers/post';
 import { CommentResolver } from './resolvers/comment';
 import Redis from 'ioredis';
 import session from 'express-session';
@@ -13,18 +11,17 @@ import connectRedis from 'connect-redis';
 import { MyContext } from './types';
 import cors from 'cors';
 import { createConnection } from 'typeorm';
-import { Post } from './entities/Post';
-import { User } from './entities/User';
-import { Comment } from './entities/Comment';
 import path from 'path';
-import { Updoot } from './entities/Updoot';
 import { createUserLoader } from './util/createUserLoader';
-import { createUpdootLoader } from './util/createUpdootLoader';
-import { createPostLoader } from './util/createPostLoader';
-import { Reply } from './entities/Reply';
-import { ReplyResolver } from './resolvers/reply';
+import { createTicketLoader } from './util/createTicketLoader';
 import { createCommentLoader } from './util/createCommentLoader';
-import { createReplyLoader } from './util/createReplyLoader';
+import { Board } from './entities/Board';
+import { Ticket } from './entities/Ticket';
+import { User } from './entities/User';
+import { KandanColumn } from './entities/KandanColumn';
+import { BoardResolver } from './resolvers/board';
+import { TicketResolver } from './resolvers/ticket';
+import { KandanColumnResolver } from './resolvers/kandanColumn';
 
 const main = async () => {
   const connection = await createConnection({
@@ -33,7 +30,7 @@ const main = async () => {
     logging: true,
     // synchronize: true,
     migrations: [path.join(__dirname, './migrations/*')],
-    entities: [Post, User, Updoot, Comment, Reply],
+    entities: [Board, KandanColumn, Ticket, User, Comment],
     // dropSchema: true,
   });
 
@@ -70,7 +67,12 @@ const main = async () => {
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [PostResolver, UserResolver, CommentResolver, ReplyResolver],
+      resolvers: [
+        BoardResolver,
+        KandanColumnResolver,
+        TicketResolver,
+        CommentResolver,
+      ],
       validate: false,
     }),
     context: ({ req, res }: MyContext) => ({
@@ -78,10 +80,8 @@ const main = async () => {
       res,
       redis,
       userLoader: createUserLoader(),
-      updootLoader: createUpdootLoader(),
-      postLoader: createPostLoader(),
       commentLoader: createCommentLoader(),
-      replyLoader: createReplyLoader(),
+      ticketLoader: createTicketLoader(),
     }),
   });
 
