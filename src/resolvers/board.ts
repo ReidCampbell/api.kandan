@@ -16,6 +16,7 @@ import {
 import { getConnection } from 'typeorm';
 import { KandanColumn } from '../entities/KandanColumn';
 import { Board } from '../entities/Board';
+import { User } from '../entities/User';
 
 @InputType()
 class BoardInput {
@@ -30,13 +31,18 @@ export class BoardResolver {
     const kandanColumns = await getConnection().query(
       `
       select p.*
-      from kandanColumn p
+      from kandan_column p
       where p."boardId" = $1
       order by p."createdAt" ASC
     `,
       [board.id]
     );
     return kandanColumns;
+  }
+
+  @FieldResolver(() => User)
+  creator(@Root() board: Board, @Ctx() { userLoader }: MyContext) {
+    return userLoader.load(board.creatorId);
   }
 
   // @Query(() => [Board])
@@ -60,7 +66,7 @@ export class BoardResolver {
     if (!req.session.userId) {
       throw new Error('Not authenticated');
     }
-    return Board.create({ ...input }).save();
+    return Board.create({ ...input, creatorId: req.session.userId }).save();
   }
 
   @Mutation(() => Board, { nullable: true })

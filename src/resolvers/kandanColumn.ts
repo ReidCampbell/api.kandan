@@ -5,9 +5,7 @@ import {
   Query,
   Arg,
   Mutation,
-  Field,
   Ctx,
-  InputType,
   UseMiddleware,
   Int,
   FieldResolver,
@@ -16,12 +14,7 @@ import {
 import { getConnection } from 'typeorm';
 import { Ticket } from '../entities/Ticket';
 import { KandanColumn } from '../entities/KandanColumn';
-
-@InputType()
-class KandanColumnInput {
-  @Field()
-  title: string;
-}
+import { Board } from '../entities/Board';
 
 @Resolver(KandanColumn)
 export class KandanColumnResolver {
@@ -39,11 +32,16 @@ export class KandanColumnResolver {
     return tickets;
   }
 
+  @FieldResolver(() => Board)
+  board(@Root() kandanColumn: KandanColumn, @Ctx() { boardLoader }: MyContext) {
+    return boardLoader.load(kandanColumn.boardId);
+  }
+
   @Query(() => [KandanColumn])
   async kandanColumns(
     @Arg('boardId', () => Int) boardId: number
-  ): Promise<Ticket[]> {
-    return Ticket.find({ where: { boardId } });
+  ): Promise<KandanColumn[]> {
+    return KandanColumn.find({ where: { boardId } });
   }
 
   @Query(() => KandanColumn, { nullable: true })
@@ -56,13 +54,14 @@ export class KandanColumnResolver {
   @Mutation(() => KandanColumn)
   @UseMiddleware(isAuth)
   async createKandanColumn(
-    @Arg('input') input: KandanColumnInput,
+    @Arg('title') title: string,
+    @Arg('boardId') boardId: number,
     @Ctx() { req }: MyContext
   ): Promise<KandanColumn> {
     if (!req.session.userId) {
       throw new Error('Not authenticated');
     }
-    return KandanColumn.create({ ...input }).save();
+    return KandanColumn.create({ title, boardId }).save();
   }
 
   @Mutation(() => KandanColumn, { nullable: true })

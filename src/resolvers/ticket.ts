@@ -17,6 +17,7 @@ import { getConnection } from 'typeorm';
 import { User } from '../entities/User';
 import { Comment } from '../entities/Comment';
 import { Ticket } from '../entities/Ticket';
+import { KandanColumn } from '../entities/KandanColumn';
 
 @InputType()
 class TicketInput {
@@ -24,6 +25,8 @@ class TicketInput {
   title: string;
   @Field()
   description: string;
+  @Field()
+  kandanColumnId: number;
 }
 
 @Resolver(Ticket)
@@ -36,6 +39,14 @@ export class TicketResolver {
   @FieldResolver(() => User)
   creator(@Root() ticket: Ticket, @Ctx() { userLoader }: MyContext) {
     return userLoader.load(ticket.creatorId);
+  }
+
+  @FieldResolver(() => KandanColumn)
+  kandanColumn(
+    @Root() ticket: Ticket,
+    @Ctx() { kandanColumnLoader }: MyContext
+  ) {
+    return kandanColumnLoader.load(ticket.kandanColumnId);
   }
 
   @FieldResolver(() => [Comment])
@@ -62,6 +73,30 @@ export class TicketResolver {
   @Query(() => Ticket, { nullable: true })
   ticket(@Arg('id', () => Int) id: number): Promise<Ticket | undefined> {
     return Ticket.findOne(id);
+  }
+
+  @Mutation(() => Ticket)
+  @UseMiddleware(isAuth)
+  async moveTicketToColumn(
+    @Arg('id', () => Int) id: number,
+    @Arg('kandanColumnId') kandanColumnId: number,
+    @Ctx() { req }: MyContext
+  ): Promise<Ticket | null> {
+    // if (!req.session.userId) {
+    //   throw new Error('Not authenticated');
+    // }
+    const result = await getConnection()
+      .createQueryBuilder()
+      .update(Ticket)
+      .set({ kandanColumnId })
+      .where('id = :id and "creatorId" = :creatorId', {
+        id,
+        creatorId: req.session.userId,
+      })
+      .returning('*')
+      .execute();
+
+    return result.raw[0];
   }
 
   @Mutation(() => Ticket)
