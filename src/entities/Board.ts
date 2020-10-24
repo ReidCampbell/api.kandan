@@ -7,9 +7,7 @@ import {
   Column,
   BaseEntity,
   OneToMany,
-  ManyToMany,
 } from 'typeorm';
-import { User } from './User';
 import { KandanColumn } from './KandanColumn';
 
 @ObjectType()
@@ -31,14 +29,18 @@ export class Board extends BaseEntity {
   @Column()
   title!: string;
 
-  @Field(() => User)
-  @ManyToMany(
-    () => User,
-    user => user.boards
-  )
-  users: User[];
+  @Field()
+  @Column()
+  creatorId: number;
 
-  @Field(() => KandanColumn)
+  // @Field(() => User)
+  // @OneToMany(
+  //   () => User,
+  //   user => user.board
+  // )
+  // users: User[];
+
+  @Field(() => [KandanColumn], { nullable: true })
   @OneToMany(
     () => KandanColumn,
     kandanColumn => kandanColumn.board

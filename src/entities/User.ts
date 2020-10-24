@@ -6,12 +6,10 @@ import {
   Column,
   BaseEntity,
   OneToMany,
-  ManyToMany,
 } from 'typeorm';
-import { ObjectType, Field } from 'type-graphql';
+import { ObjectType, Field, Int } from 'type-graphql';
 import { Comment } from './Comment';
 import { Ticket } from './Ticket';
-import { Board } from './Board';
 
 @ObjectType()
 @Entity()
@@ -43,11 +41,15 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   avatar: string;
 
-  @ManyToMany(
-    () => Board,
-    board => board.users
-  )
-  boards: Board[];
+  @Field(() => Int, { nullable: true })
+  @Column({ nullable: true })
+  boardId: number;
+
+  // @ManyToOne(
+  //   () => Board,
+  //   board => board.users
+  // )
+  // board: Board;
 
   @OneToMany(
     () => Ticket,

@@ -47,7 +47,7 @@ export class Ticket extends BaseEntity {
   @Field(() => User)
   @ManyToOne(
     () => User,
-    user => user.comments
+    user => user.tickets
   )
   creator: User;
 
@@ -57,13 +57,13 @@ export class Ticket extends BaseEntity {
     kandanColumn => kandanColumn.tickets,
     { onDelete: 'CASCADE' }
   )
-  kandKandanColumn: KandanColumn;
+  kandanColumn: KandanColumn;
 
-  @Field(() => Comment)
+  @Field(() => [Comment], { nullable: true })
   @OneToMany(
     () => Comment,
     comment => comment.ticket,
     { onDelete: 'CASCADE' }
   )
-  comments: Comment;
+  comments: Comment[];
 }

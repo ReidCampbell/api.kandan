@@ -7,6 +7,7 @@ import {
   Column,
   BaseEntity,
   OneToMany,
+  ManyToOne,
 } from 'typeorm';
 import { Board } from './Board';
 import { Ticket } from './Ticket';
@@ -30,17 +31,21 @@ export class KandanColumn extends BaseEntity {
   @Column()
   title!: string;
 
+  @Field()
+  @Column()
+  boardId!: number;
+
   @Field(() => Board)
-  @OneToMany(
+  @ManyToOne(
     () => Board,
     board => board.kandanColumns
   )
   board: Board;
 
-  @Field(() => Ticket)
+  @Field(() => [Ticket], { nullable: true })
   @OneToMany(
     () => Ticket,
     ticket => ticket.kandanColumnId
   )
-  tickets: Ticket;
+  tickets: Ticket[];
 }
