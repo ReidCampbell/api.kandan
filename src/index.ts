@@ -18,17 +18,21 @@ import { createCommentLoader } from './util/createCommentLoader';
 import { Board } from './entities/Board';
 import { Ticket } from './entities/Ticket';
 import { User } from './entities/User';
+import { Comment } from './entities/Comment';
 import { KandanColumn } from './entities/KandanColumn';
 import { BoardResolver } from './resolvers/board';
 import { TicketResolver } from './resolvers/ticket';
 import { KandanColumnResolver } from './resolvers/kandanColumn';
+import { UserResolver } from './resolvers/user';
+import { createBoardLoader } from './util/createBoardLoader';
+import { createKandanColumnLoader } from './util/createKandanColumnLoader';
 
 const main = async () => {
   const connection = await createConnection({
     type: 'postgres',
     url: process.env.DATABASE_URL,
     logging: true,
-    // synchronize: true,
+    synchronize: true,
     migrations: [path.join(__dirname, './migrations/*')],
     entities: [Board, KandanColumn, Ticket, User, Comment],
     // dropSchema: true,
@@ -69,6 +73,7 @@ const main = async () => {
     schema: await buildSchema({
       resolvers: [
         BoardResolver,
+        UserResolver,
         KandanColumnResolver,
         TicketResolver,
         CommentResolver,
@@ -82,6 +87,8 @@ const main = async () => {
       userLoader: createUserLoader(),
       commentLoader: createCommentLoader(),
       ticketLoader: createTicketLoader(),
+      boardLoader: createBoardLoader(),
+      columnLoader: createKandanColumnLoader(),
     }),
   });
 
