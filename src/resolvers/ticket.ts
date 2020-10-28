@@ -79,19 +79,18 @@ export class TicketResolver {
   @UseMiddleware(isAuth)
   async moveTicketToColumn(
     @Arg('id', () => Int) id: number,
-    @Arg('kandanColumnId') kandanColumnId: number,
+    @Arg('kandanColumnId', () => Int) kandanColumnId: number,
     @Ctx() { req }: MyContext
   ): Promise<Ticket | null> {
-    // if (!req.session.userId) {
-    //   throw new Error('Not authenticated');
-    // }
+    if (!req.session.userId) {
+      throw new Error('Not authenticated');
+    }
     const result = await getConnection()
       .createQueryBuilder()
       .update(Ticket)
       .set({ kandanColumnId })
-      .where('id = :id and "creatorId" = :creatorId', {
+      .where('id = :id', {
         id,
-        creatorId: req.session.userId,
       })
       .returning('*')
       .execute();

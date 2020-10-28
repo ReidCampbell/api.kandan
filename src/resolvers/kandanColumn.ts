@@ -55,7 +55,7 @@ export class KandanColumnResolver {
   @UseMiddleware(isAuth)
   async createKandanColumn(
     @Arg('title') title: string,
-    @Arg('boardId') boardId: number,
+    @Arg('boardId', () => Int) boardId: number,
     @Ctx() { req }: MyContext
   ): Promise<KandanColumn> {
     if (!req.session.userId) {
